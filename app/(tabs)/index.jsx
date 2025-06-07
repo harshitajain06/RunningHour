@@ -54,7 +54,7 @@ const RegistrationScreen = () => {
 
       {/* Buttons */}
       <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('VolunteerRegistration')}>
-        <Text style={styles.buttonText}>Volunteer</Text>
+        <Text style={styles.buttonText}>Buddy</Text>
         <Icon name="account-heart" size={24} color="#19235E" style={styles.icon} />
       </TouchableOpacity>
 
