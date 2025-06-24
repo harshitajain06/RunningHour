@@ -1,16 +1,42 @@
-import React from 'react';
-import { View, Text, Image, TouchableOpacity, ScrollView, StyleSheet } from 'react-native';
+import React, { useState } from 'react';
+import {
+  View,
+  Text,
+  Image,
+  TouchableOpacity,
+  ScrollView,
+  StyleSheet,
+  Modal,
+  Alert,
+} from 'react-native';
 import { Ionicons, FontAwesome, Entypo, Feather } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
+import { getAuth, signOut } from 'firebase/auth';
 
 export default function RunninghourHomePage() {
   const navigation = useNavigation();
+  const [isModalVisible, setModalVisible] = useState(false);
+
+  const handleLogout = async () => {
+    try {
+      const auth = getAuth();
+      await signOut(auth);
+      Alert.alert('Logged Out', 'You have been successfully logged out.');
+      setModalVisible(false);
+      // Optionally navigate to Login page
+      navigation.replace('Login');
+    } catch (error) {
+      Alert.alert('Error', 'Failed to log out.');
+    }
+  };
 
   return (
     <ScrollView style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <Ionicons name="person-circle" size={30} color="#fff" />
+        <TouchableOpacity onPress={() => setModalVisible(true)}>
+          <Ionicons name="person-circle" size={30} color="#fff" />
+        </TouchableOpacity>
         <Image source={require('../../assets/images/logo.png')} style={styles.logo} />
         <Ionicons name="notifications-outline" size={30} color="#fff" />
       </View>
@@ -20,24 +46,48 @@ export default function RunninghourHomePage() {
 
       {/* Cards Section */}
       <View style={styles.cardContainer}>
-        <TouchableOpacity style={styles.card} onPress={() => navigation.navigate('RunningLocations')}>
-          <Image source={require('../../assets/images/running_locations.jpg')} style={styles.cardImage} />
+        <TouchableOpacity
+          style={styles.card}
+          onPress={() => navigation.navigate('ShowLocations')}
+        >
+          <Image
+            source={require('../../assets/images/running_locations.jpg')}
+            style={styles.cardImage}
+          />
           <Text style={styles.cardText}>Running Locations</Text>
         </TouchableOpacity>
 
         <View style={styles.row}>
-          <TouchableOpacity style={styles.smallCard} onPress={() => navigation.navigate('ShowUpcomingSessions')}>
-            <Image source={require('../../assets/images/upcoming_activities.jpg')} style={styles.cardImage} />
+          <TouchableOpacity
+            style={styles.smallCard}
+            onPress={() => navigation.navigate('ShowUpcomingSessions')}
+          >
+            <Image
+              source={require('../../assets/images/upcoming_activities.jpg')}
+              style={styles.cardImage}
+            />
             <Text style={styles.cardText}>Upcoming Activities</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.smallCard} onPress={() => navigation.navigate('UpcomingAnnouncements')}>
-            <Image source={require('../../assets/images/weekly_activities.jpg')} style={styles.cardImage} />
+          <TouchableOpacity
+            style={styles.smallCard}
+            onPress={() => navigation.navigate('UpcomingAnnouncements')}
+          >
+            <Image
+              source={require('../../assets/images/weekly_activities.jpg')}
+              style={styles.cardImage}
+            />
             <Text style={styles.cardText}>Weekly Activities</Text>
           </TouchableOpacity>
         </View>
 
-        <TouchableOpacity style={styles.card} onPress={() => navigation.navigate("BookActivities")}>
-          <Image source={require('../../assets/images/book_activities.jpg')} style={styles.cardImage} />
+        <TouchableOpacity
+          style={styles.card}
+          onPress={() => navigation.navigate('BookActivities')}
+        >
+          <Image
+            source={require('../../assets/images/book_activities.jpg')}
+            style={styles.cardImage}
+          />
           <Text style={styles.cardText}>Book Runninghour's Activities</Text>
         </TouchableOpacity>
       </View>
@@ -57,6 +107,29 @@ export default function RunninghourHomePage() {
         <Text style={styles.footerLink}>|</Text>
         <Text style={styles.footerLink}>Privacy Notice</Text>
       </View>
+
+      {/* Logout Modal */}
+      <Modal
+        visible={isModalVisible}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Profile</Text>
+            <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
+              <Text style={styles.logoutText}>Logout</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => setModalVisible(false)}
+              style={styles.cancelButton}
+            >
+              <Text style={styles.cancelText}>Cancel</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </ScrollView>
   );
 }
@@ -73,7 +146,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: 10,
-    height: 80
+    height: 80,
   },
   logo: {
     width: 120,
@@ -136,6 +209,42 @@ const styles = StyleSheet.create({
   },
   footerLink: {
     marginHorizontal: 5,
+    fontWeight: '600',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    backgroundColor: '#fff',
+    padding: 20,
+    borderRadius: 10,
+    width: 250,
+    alignItems: 'center',
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 20,
+  },
+  logoutButton: {
+    backgroundColor: '#19235E',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 5,
+    marginBottom: 10,
+  },
+  logoutText: {
+    color: '#fff',
+    fontWeight: '600',
+  },
+  cancelButton: {
+    padding: 10,
+  },
+  cancelText: {
+    color: '#19235E',
     fontWeight: '600',
   },
 });

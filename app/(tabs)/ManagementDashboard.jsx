@@ -63,6 +63,16 @@ const ManagementDashboard = () => {
           <Ionicons name="location-outline" size={30} color="#fff" />
           <Text style={styles.buttonText}>Manage Event Locations</Text>
         </TouchableOpacity>
+        {/* View Bookings Button */}
+<TouchableOpacity
+  style={styles.button}
+  onPress={() => navigation.navigate('ViewBookings')}
+  accessibilityLabel="View bookings"
+  accessibilityHint="Allows you to view all volunteer bookings"
+>
+  <Ionicons name="book-outline" size={30} color="#fff" />
+  <Text style={styles.buttonText}>View Bookings</Text>
+</TouchableOpacity>
       </View>
     </SafeAreaView>
   );

@@ -12,9 +12,10 @@ import {
 } from 'react-native';
 import { Calendar } from 'react-native-calendars';
 import Modal from 'react-native-modal';
-import { collection, getDocs } from 'firebase/firestore';
+import { collection, getDocs, addDoc, doc, getDoc } from 'firebase/firestore';
+import { getAuth } from 'firebase/auth';
 import { db } from '../../config/firebase';
-import Legend from './Legend'; // Import the Legend component
+import Legend from './Legend';
 
 const SESSION_TYPES = [
   { label: 'ROUTINE VOLUNTEERING STILL AVAILABLE', value: 'ROUTINE_AVAILABLE' },
@@ -42,7 +43,6 @@ const ShowUpcomingSessions = () => {
     fetchSessions();
   }, []);
 
-  // Fetch sessions from Firestore
   const fetchSessions = async () => {
     setIsLoading(true);
     try {
@@ -50,8 +50,8 @@ const ShowUpcomingSessions = () => {
       const sessionsSnapshot = await getDocs(sessionsCol);
       let marks = {};
 
-      sessionsSnapshot.forEach((doc) => {
-        const data = doc.data();
+      sessionsSnapshot.forEach((docSnap) => {
+        const data = docSnap.data();
         const date = data.date; // Expected format: 'YYYY-MM-DD'
         const type = data.sessionType;
 
@@ -65,7 +65,7 @@ const ShowUpcomingSessions = () => {
               color: SESSION_COLORS[type],
             },
           ],
-          sessionData: data, // Store session data for this date
+          sessionData: { ...data, id: docSnap.id },
         };
       });
 
@@ -77,7 +77,6 @@ const ShowUpcomingSessions = () => {
     setIsLoading(false);
   };
 
-  // Handle day press
   const onDayPress = (day) => {
     const selectedDateData = markedDates[day.dateString];
     if (selectedDateData && selectedDateData.sessionData) {
@@ -85,6 +84,45 @@ const ShowUpcomingSessions = () => {
       setModalVisible(true);
     } else {
       Alert.alert('No session', 'No sessions scheduled on this date.');
+    }
+  };
+
+  const bookSession = async () => {
+    if (!selectedSession) return;
+
+    const auth = getAuth();
+    const user = auth.currentUser;
+
+    try {
+      let userName = 'Unnamed Volunteer';
+      let userEmail = user?.email || 'No Email';
+
+      if (user?.uid) {
+        const userDoc = await getDoc(doc(db, 'users', user.uid));
+        if (userDoc.exists()) {
+          const userData = userDoc.data();
+          userName = userData.name || userName;
+        }
+      }
+
+      const bookingData = {
+        sessionId: selectedSession.id || 'unknown',
+        sessionType: selectedSession.sessionType,
+        date: selectedSession.date,
+        description: selectedSession.description || '',
+        bookedAt: new Date().toISOString(),
+        userId: user?.uid || 'anonymous',
+        userName,
+        userEmail,
+      };
+
+      await addDoc(collection(db, 'bookings'), bookingData);
+
+      Alert.alert('Success', 'You have successfully booked the session!');
+      setModalVisible(false);
+    } catch (error) {
+      console.error('Booking error:', error);
+      Alert.alert('Error', 'Failed to book the session. Please try again.');
     }
   };
 
@@ -96,13 +134,10 @@ const ShowUpcomingSessions = () => {
         <Text style={styles.headerText}>SCDC SMART</Text>
       </View>
 
-      {/* Title */}
       <Text style={styles.title}>Upcoming Activities</Text>
 
-      {/* Loading Indicator */}
       {isLoading && <ActivityIndicator size="large" color="#19235E" />}
 
-      {/* Calendar */}
       <Calendar
         onDayPress={onDayPress}
         markedDates={markedDates}
@@ -122,10 +157,9 @@ const ShowUpcomingSessions = () => {
         }}
       />
 
-      {/* Legend */}
       <Legend sessionTypes={SESSION_TYPES} sessionColors={SESSION_COLORS} />
 
-      {/* Modal for showing session description */}
+      {/* Modal */}
       <Modal isVisible={isModalVisible} onBackdropPress={() => setModalVisible(false)}>
         <View style={styles.modalContent}>
           <Text style={styles.modalTitle}>Session Details</Text>
@@ -141,19 +175,27 @@ const ShowUpcomingSessions = () => {
             <Text>No session data available</Text>
           )}
 
-          <TouchableOpacity
-            style={styles.closeButton}
-            onPress={() => setModalVisible(false)}
-          >
-            <Text style={styles.closeButtonText}>Close</Text>
-          </TouchableOpacity>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: '100%' }}>
+            <TouchableOpacity
+              style={[styles.closeButton, { backgroundColor: '#19235E', flex: 1, marginRight: 10 }]}
+              onPress={bookSession}
+            >
+              <Text style={styles.closeButtonText}>Book Now</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.closeButton, { backgroundColor: '#aaa', flex: 1 }]}
+              onPress={() => setModalVisible(false)}
+            >
+              <Text style={styles.closeButtonText}>Close</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </Modal>
     </ScrollView>
   );
 };
 
-// Styles
 const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
@@ -209,7 +251,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   closeButton: {
-    backgroundColor: '#19235E',
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 8,
@@ -218,6 +259,7 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
     fontWeight: '600',
+    textAlign: 'center',
   },
 });
 
