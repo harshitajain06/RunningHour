@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import {
   View,
@@ -18,15 +19,14 @@ import { useAuthState } from 'react-firebase-hooks/auth';
 const AthleteRegistration = () => {
   const navigation = useNavigation();
 
-  // State for form inputs
-  const [user, loading, error] = useAuthState(auth);
+  const [user] = useAuthState(auth);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [sport, setSport] = useState('');
   const [additionalSports, setAdditionalSports] = useState('');
   const [nearestMTR, setNearestMTR] = useState('');
-  const [userType, setUserType] = useState('Athlete'); // Default user type
+  const userType = 'Athlete'; // Fixed user type
 
   useEffect(() => {
     if (user) {
@@ -34,14 +34,11 @@ const AthleteRegistration = () => {
     }
   }, [user]);
 
-  // Form submission handler
   const handleSubmit = async () => {
     try {
-      // Create user with Firebase Auth
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
 
-      // User data to store in Firestore
       const userData = {
         uid: user.uid,
         name,
@@ -49,14 +46,13 @@ const AthleteRegistration = () => {
         sport,
         additionalSports,
         nearestMTR,
-        userType, // Save user type in Firestore
+        userType,
       };
 
-      // Add user data to Firestore
       await setDoc(doc(usersRef, user.uid), userData);
 
       Alert.alert('Success', 'Registration submitted successfully!');
-      navigation.navigate(`${userType}Dashboard`); // Navigate to the appropriate dashboard
+      navigation.navigate('AthleteDashboard');
     } catch (error) {
       Alert.alert('Error', error.message);
       console.log(error);
@@ -71,49 +67,6 @@ const AthleteRegistration = () => {
       </View>
 
       <Text style={styles.title}>User Registration</Text>
-
-      <Text style={styles.label}>Select User Type:</Text>
-      <View style={styles.userTypeContainer}>
-        <TouchableOpacity
-          style={[styles.userTypeButton, userType === 'Volunteer' && styles.activeButton]}
-          onPress={() => setUserType('Volunteer')}
-        >
-          <Text
-            style={[
-              styles.userTypeText,
-              userType === 'Volunteer' && styles.activeTextColor,
-            ]}
-          >
-            Volunteer
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.userTypeButton, userType === 'Management' && styles.activeButton]}
-          onPress={() => setUserType('Management')}
-        >
-          <Text
-            style={[
-              styles.userTypeText,
-              userType === 'Management' && styles.activeTextColor,
-            ]}
-          >
-            Management
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.userTypeButton, userType === 'Athlete' && styles.activeButton]}
-          onPress={() => setUserType('Athlete')}
-        >
-          <Text
-            style={[
-              styles.userTypeText,
-              userType === 'Athlete' && styles.activeTextColor,
-            ]}
-          >
-            Athlete
-          </Text>
-        </TouchableOpacity>
-      </View>
 
       <TextInput
         style={styles.input}
@@ -138,7 +91,7 @@ const AthleteRegistration = () => {
         placeholderTextColor="#888"
         value={password}
         onChangeText={setPassword}
-        secureTextEntry // Secure password input
+        secureTextEntry
       />
 
       <TextInput
@@ -176,12 +129,11 @@ const AthleteRegistration = () => {
   );
 };
 
-// Styles
 const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
     padding: 20,
-    backgroundColor: '#DDE4CB', // Background color
+    backgroundColor: '#DDE4CB',
   },
   headerContainer: {
     flexDirection: 'row',
@@ -206,33 +158,6 @@ const styles = StyleSheet.create({
     marginBottom: 15,
     color: '#19235E',
     textAlign: 'center',
-  },
-  label: {
-    fontSize: 16,
-    marginBottom: 10,
-    color: '#19235E',
-  },
-  userTypeContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginBottom: 20,
-  },
-  userTypeButton: {
-    paddingVertical: 10,
-    paddingHorizontal: 15,
-    borderWidth: 1,
-    borderColor: '#19235E',
-    borderRadius: 8,
-  },
-  activeButton: {
-    backgroundColor: '#19235E',
-  },
-  userTypeText: {
-    color: '#19235E',
-    fontWeight: '600',
-  },
-  activeTextColor: {
-    color: '#fff',
   },
   input: {
     height: 50,
