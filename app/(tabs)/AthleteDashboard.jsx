@@ -13,11 +13,11 @@ const AthleteDashboard = () => {
       {/* Header */}
       <View style={styles.headerContainer}>
         <Image source={require('../../assets/images/logo.png')} style={styles.logo} />
-        <Text style={styles.headerText}>SCDC SMART</Text>
+        <Text style={styles.headerText}>RunningHour</Text>
       </View>
 
       {/* Title */}
-      <Text style={styles.title}>Athlete Dashboard</Text>
+      <Text style={styles.title}>Buddy Dashboard</Text>
 
       {/* Buttons */}
       <View style={styles.buttonContainer}>
@@ -39,9 +39,6 @@ const AthleteDashboard = () => {
           accessibilityLabel="Transportation Enquiries Button"
           accessibilityHint="Navigate to submit transportation enquiries"
         >
-          <Ionicons name="bus-outline" size={30} color="#fff" />
-          <Text style={styles.buttonText}>Transportation Enquiries</Text>
-        </TouchableOpacity>
 
         {/* Upcoming Announcements Button */}
         <TouchableOpacity
