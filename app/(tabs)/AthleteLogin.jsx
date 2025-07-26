@@ -32,10 +32,10 @@ const AthleteLogin = () => {
     <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.headerContainer}>
         <Image source={require('../../assets/images/logo.png')} style={styles.logo} />
-        <Text style={styles.headerText}>SCDC SMART</Text>
+        <Text style={styles.headerText}>RunningHour</Text>
       </View>
 
-      <Text style={styles.title}>Athlete Login</Text>
+      <Text style={styles.title}>Buddy Login</Text>
 
       <TextInput
         style={styles.input}
