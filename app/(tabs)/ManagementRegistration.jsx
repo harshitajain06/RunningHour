@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import {
   View,
@@ -10,7 +11,6 @@ import {
   Alert,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import Ionicons from 'react-native-vector-icons/Ionicons';
 import { auth, usersRef } from '../../config/firebase';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { setDoc, doc } from 'firebase/firestore';
@@ -19,14 +19,11 @@ import { useAuthState } from 'react-firebase-hooks/auth';
 const ManagementRegistration = () => {
   const navigation = useNavigation();
 
-  // State for form inputs
   const [user, loading, error] = useAuthState(auth);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [sdscteam, setSdscteam] = useState('');
-  const [nearestMTR, setNearestMTR] = useState('');
-  const [userType, setUserType] = useState('Management'); // Default user type
 
   useEffect(() => {
     if (user) {
@@ -34,33 +31,28 @@ const ManagementRegistration = () => {
     }
   }, [user]);
 
-  // Form submission handler
   const handleSubmit = async () => {
     try {
-      if (!name.trim() || !email.trim() || !password.trim() || !sdscteam.trim() || !nearestMTR.trim()) {
+      if (!name.trim() || !email.trim() || !password.trim() || !sdscteam.trim()) {
         Alert.alert('Validation Error', 'Please fill in all fields.');
         return;
       }
 
-      // Create user with Firebase Auth
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
 
-      // User data to store in Firestore
       const userData = {
         uid: user.uid,
         name,
         email,
         sdscteam,
-        nearestMTR,
-        userType, // Save user type in Firestore
+        userType: 'Management',
       };
 
-      // Add user data to Firestore
       await setDoc(doc(usersRef, user.uid), userData);
 
       Alert.alert('Success', 'Registration submitted successfully!');
-      navigation.navigate(`${userType}Dashboard`);
+      navigation.navigate('ManagementDashboard');
     } catch (error) {
       Alert.alert('Error', error.message);
       console.log(error);
@@ -75,34 +67,6 @@ const ManagementRegistration = () => {
       </View>
 
       <Text style={styles.title}>Management Registration</Text>
-
-      <Text style={styles.label}>Select User Type:</Text>
-      <View style={styles.userTypeContainer}>
-        <TouchableOpacity
-          style={[styles.userTypeButton, userType === 'Volunteer' && styles.activeButton]}
-          onPress={() => setUserType('Volunteer')}
-        >
-          <Text style={[styles.userTypeText, userType === 'Volunteer' && styles.activeText]}>
-            Volunteer
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.userTypeButton, userType === 'Management' && styles.activeButton]}
-          onPress={() => setUserType('Management')}
-        >
-          <Text style={[styles.userTypeText, userType === 'Management' && styles.activeText]}>
-            Management
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.userTypeButton, userType === 'Athlete' && styles.activeButton]}
-          onPress={() => setUserType('Athlete')}
-        >
-          <Text style={[styles.userTypeText, userType === 'Athlete' && styles.activeText]}>
-            Athlete
-          </Text>
-        </TouchableOpacity>
-      </View>
 
       <TextInput
         style={styles.input}
@@ -138,14 +102,6 @@ const ManagementRegistration = () => {
         onChangeText={setSdscteam}
       />
 
-      <TextInput
-        style={styles.input}
-        placeholder="Nearest MTR Station"
-        placeholderTextColor="#888"
-        value={nearestMTR}
-        onChangeText={setNearestMTR}
-      />
-
       <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
         <Text style={styles.submitButtonText}>Submit</Text>
       </TouchableOpacity>
@@ -157,7 +113,6 @@ const ManagementRegistration = () => {
   );
 };
 
-// Styles
 const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
@@ -187,33 +142,6 @@ const styles = StyleSheet.create({
     marginBottom: 15,
     color: '#19235E',
     textAlign: 'center',
-  },
-  label: {
-    fontSize: 16,
-    marginBottom: 10,
-    color: '#19235E',
-  },
-  userTypeContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginBottom: 20,
-  },
-  userTypeButton: {
-    paddingVertical: 10,
-    paddingHorizontal: 15,
-    borderWidth: 1,
-    borderColor: '#19235E',
-    borderRadius: 8,
-  },
-  activeButton: {
-    backgroundColor: '#19235E',
-  },
-  userTypeText: {
-    color: '#19235E',
-    fontWeight: '600',
-  },
-  activeText: {
-    color: '#fff',
   },
   input: {
     height: 50,
