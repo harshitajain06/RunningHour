@@ -63,7 +63,7 @@ const ManagementRegistration = () => {
     <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.headerContainer}>
         <Image source={require('../../assets/images/logo.png')} style={styles.logo} />
-        <Text style={styles.headerText}>SCDC SMART</Text>
+        <Text style={styles.headerText}>RunningHour</Text>
       </View>
 
       <Text style={styles.title}>Management Registration</Text>
