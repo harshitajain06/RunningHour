@@ -28,7 +28,7 @@ const SelectSport = () => {
           source={require('../../assets/images/logo.png')} // Local image
           style={styles.logo}
         />
-        <Text style={styles.title}>Volunteer Learning System</Text>
+        <Text style={styles.title}>Guides Learning System</Text>
       </View>
 
       {/* Button to Open Modal */}
@@ -48,7 +48,7 @@ const SelectSport = () => {
       >
         <View style={styles.modalBackground}>
           <View style={styles.modalContainer}>
-            <Text style={styles.modalTitle}>Select a Sport</Text>
+            <Text style={styles.modalTitle}>Select an Activity</Text>
             {sports.map((sport) => (
               <TouchableOpacity
                 key={sport}
@@ -77,7 +77,7 @@ const SelectSport = () => {
         style={styles.button}
         onPress={() => handleNavigation('howToAssist')}
       >
-        <Text style={styles.buttonText}>How to Assist</Text>
+        <Text style={styles.buttonText}>How to Communicate</Text>
       </TouchableOpacity>
     </View>
   );
