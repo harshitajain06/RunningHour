@@ -35,7 +35,7 @@ const ViewBookings = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <Text style={styles.title}>Volunteer Bookings</Text>
+      <Text style={styles.title}>Guide Bookings</Text>
 
       {isLoading ? (
         <ActivityIndicator size="large" color="#19235E" />
@@ -46,11 +46,16 @@ const ViewBookings = () => {
           ) : (
             bookings.map((booking) => (
               <View key={booking.id} style={styles.card}>
-                <Text style={styles.label}>Volunteer Name:</Text>
+                <Text style={styles.label}>Guide Name:</Text>
                 <Text style={styles.value}>{booking.userName}</Text>
 
                 <Text style={styles.label}>Email:</Text>
                 <Text style={styles.value}>{booking.userEmail}</Text>
+
+                <Text style={styles.label}>Phone Number:</Text>
+                <Text style={styles.value}>
+                  {booking.phoneNumber || 'Not provided'}
+                </Text>
 
                 <Text style={styles.label}>Session Type:</Text>
                 <Text style={styles.value}>{booking.sessionType}</Text>
