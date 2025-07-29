@@ -45,7 +45,6 @@ const AthleteRegistration = () => {
         email,
         sport,
         additionalSports,
-        nearestMTR,
         userType,
       };
 
@@ -63,7 +62,7 @@ const AthleteRegistration = () => {
     <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.headerContainer}>
         <Image source={require('../../assets/images/logo.png')} style={styles.logo} />
-        <Text style={styles.headerText}>SCDC SMART</Text>
+        <Text style={styles.headerText}>RunningHour</Text>
       </View>
 
       <Text style={styles.title}>User Registration</Text>
@@ -108,14 +107,6 @@ const AthleteRegistration = () => {
         placeholderTextColor="#888"
         value={additionalSports}
         onChangeText={setAdditionalSports}
-      />
-
-      <TextInput
-        style={styles.input}
-        placeholder="Nearest MTR Station"
-        placeholderTextColor="#888"
-        value={nearestMTR}
-        onChangeText={setNearestMTR}
       />
 
       <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
