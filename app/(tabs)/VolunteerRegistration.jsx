@@ -50,6 +50,11 @@ const CreateGuideAccount = () => {
   };
 
   return (
+      <ScrollView contentContainerStyle={styles.container}>
+      <View style={styles.headerContainer}>
+        <Image source={require('../../assets/images/logo.png')} style={styles.logo} />
+        <Text style={styles.headerText}>RunningHour</Text>
+      </View>
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.header}>Create Guide Account</Text>
 
