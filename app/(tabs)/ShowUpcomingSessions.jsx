@@ -1,4 +1,3 @@
-// src/components/ShowUpcomingSessions.js
 import React, { useState, useEffect } from 'react';
 import {
   View,
@@ -12,7 +11,16 @@ import {
 } from 'react-native';
 import { Calendar } from 'react-native-calendars';
 import Modal from 'react-native-modal';
-import { collection, getDocs, addDoc, doc, getDoc } from 'firebase/firestore';
+import {
+  collection,
+  getDocs,
+  addDoc,
+  doc,
+  getDoc,
+  deleteDoc,
+  query,
+  where,
+} from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
 import { db } from '../../config/firebase';
 import Legend from './Legend';
@@ -38,6 +46,7 @@ const ShowUpcomingSessions = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isModalVisible, setModalVisible] = useState(false);
   const [selectedSession, setSelectedSession] = useState(null);
+  const [hasBooked, setHasBooked] = useState(false);
 
   useEffect(() => {
     fetchSessions();
@@ -52,7 +61,7 @@ const ShowUpcomingSessions = () => {
 
       sessionsSnapshot.forEach((docSnap) => {
         const data = docSnap.data();
-        const date = data.date; // Expected format: 'YYYY-MM-DD'
+        const date = data.date;
         const type = data.sessionType;
 
         marks[date] = {
@@ -77,10 +86,27 @@ const ShowUpcomingSessions = () => {
     setIsLoading(false);
   };
 
-  const onDayPress = (day) => {
+  const fetchBookingStatus = async (sessionId) => {
+    const auth = getAuth();
+    const user = auth.currentUser;
+    if (!user) return;
+
+    const q = query(
+      collection(db, 'bookings'),
+      where('sessionId', '==', sessionId),
+      where('userId', '==', user.uid)
+    );
+
+    const snapshot = await getDocs(q);
+    setHasBooked(!snapshot.empty);
+  };
+
+  const onDayPress = async (day) => {
     const selectedDateData = markedDates[day.dateString];
     if (selectedDateData && selectedDateData.sessionData) {
-      setSelectedSession(selectedDateData.sessionData);
+      const session = selectedDateData.sessionData;
+      setSelectedSession(session);
+      await fetchBookingStatus(session.id);
       setModalVisible(true);
     } else {
       Alert.alert('No session', 'No sessions scheduled on this date.');
@@ -119,6 +145,7 @@ const ShowUpcomingSessions = () => {
       await addDoc(collection(db, 'bookings'), bookingData);
 
       Alert.alert('Success', 'You have successfully booked the session!');
+      setHasBooked(true);
       setModalVisible(false);
     } catch (error) {
       console.error('Booking error:', error);
@@ -126,9 +153,38 @@ const ShowUpcomingSessions = () => {
     }
   };
 
+  const cancelBooking = async () => {
+    const auth = getAuth();
+    const user = auth.currentUser;
+    if (!user || !selectedSession) return;
+
+    try {
+      const q = query(
+        collection(db, 'bookings'),
+        where('sessionId', '==', selectedSession.id),
+        where('userId', '==', user.uid)
+      );
+
+      const snapshot = await getDocs(q);
+      if (snapshot.empty) {
+        Alert.alert('Error', 'No booking found to cancel.');
+        return;
+      }
+
+      const bookingDoc = snapshot.docs[0];
+      await deleteDoc(doc(db, 'bookings', bookingDoc.id));
+
+      Alert.alert('Cancelled', 'Your booking has been cancelled.');
+      setHasBooked(false);
+      setModalVisible(false);
+    } catch (error) {
+      console.error('Cancellation error:', error);
+      Alert.alert('Error', 'Failed to cancel booking. Please try again.');
+    }
+  };
+
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      {/* Header */}
       <View style={styles.headerContainer}>
         <Image source={require('../../assets/images/logo.png')} style={styles.logo} />
         <Text style={styles.headerText}>SCDC SMART</Text>
@@ -159,7 +215,6 @@ const ShowUpcomingSessions = () => {
 
       <Legend sessionTypes={SESSION_TYPES} sessionColors={SESSION_COLORS} />
 
-      {/* Modal */}
       <Modal isVisible={isModalVisible} onBackdropPress={() => setModalVisible(false)}>
         <View style={styles.modalContent}>
           <Text style={styles.modalTitle}>Session Details</Text>
@@ -176,12 +231,21 @@ const ShowUpcomingSessions = () => {
           )}
 
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: '100%' }}>
-            <TouchableOpacity
-              style={[styles.closeButton, { backgroundColor: '#19235E', flex: 1, marginRight: 10 }]}
-              onPress={bookSession}
-            >
-              <Text style={styles.closeButtonText}>Book Now</Text>
-            </TouchableOpacity>
+            {hasBooked ? (
+              <TouchableOpacity
+                style={[styles.closeButton, { backgroundColor: '#e74c3c', flex: 1, marginRight: 10 }]}
+                onPress={cancelBooking}
+              >
+                <Text style={styles.closeButtonText}>Cancel Booking</Text>
+              </TouchableOpacity>
+            ) : (
+              <TouchableOpacity
+                style={[styles.closeButton, { backgroundColor: '#19235E', flex: 1, marginRight: 10 }]}
+                onPress={bookSession}
+              >
+                <Text style={styles.closeButtonText}>Book Now</Text>
+              </TouchableOpacity>
+            )}
 
             <TouchableOpacity
               style={[styles.closeButton, { backgroundColor: '#aaa', flex: 1 }]}
