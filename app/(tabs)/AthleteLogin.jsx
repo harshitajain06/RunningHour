@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import {
   View,
@@ -5,45 +6,70 @@ import {
   TextInput,
   StyleSheet,
   TouchableOpacity,
-  Image,
   ScrollView,
   Alert,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { auth } from '../../config/firebase';
-import { signInWithEmailAndPassword } from 'firebase/auth';
+import { auth, usersRef } from '../../config/firebase';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { setDoc, doc } from 'firebase/firestore';
 
-const AthleteLogin = () => {
-  const navigation = useNavigation();
+const CreateGuideAccount = () => {
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState(''); 
+  const [sdscteam, setSdscteam] = useState('');
 
-  const handleLogin = async () => {
+  const navigation = useNavigation();
+
+  const handleSignUp = async () => {
+    if (!name.trim() || !email.trim() || !password.trim() || !phoneNumber.trim() || !sdscteam.trim()) {
+      Alert.alert('Validation Error', 'Please fill in all fields.');
+      return;
+    }
+
     try {
-      await signInWithEmailAndPassword(auth, email, password);
-      Alert.alert('Success', 'Logged in successfully!');
-      navigation.replace('AthleteDashboard');
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+
+      await setDoc(doc(usersRef, user.uid), {
+        uid: user.uid,
+        name,
+        email,
+        phoneNumber, // ✅ stored in Firestore
+        sdscteam,
+        userType: 'Guide',
+      });
+
+      Alert.alert('Success', 'Guide account created successfully.');
+      navigation.goBack();
     } catch (error) {
-      Alert.alert('Login Failed', error.message);
+      console.log('Error creating guide account:', error);
+      Alert.alert('Error', error.message || 'Failed to create account');
     }
   };
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <View style={styles.headerContainer}>
-        <Image source={require('../../assets/images/logo.png')} style={styles.logo} />
-        <Text style={styles.headerText}>SCDC SMART</Text>
-      </View>
-
-      <Text style={styles.title}>Athlete Login</Text>
+      <Text style={styles.header}>Create Guide Account</Text>
 
       <TextInput
         style={styles.input}
-        placeholder="Email Address"
+        placeholder="Full Name"
+        placeholderTextColor="#888"
+        value={name}
+        onChangeText={setName}
+      />
+
+      <TextInput
+        style={styles.input}
+        placeholder="Email"
         placeholderTextColor="#888"
         value={email}
         onChangeText={setEmail}
         keyboardType="email-address"
+        autoCapitalize="none"
       />
 
       <TextInput
@@ -55,15 +81,26 @@ const AthleteLogin = () => {
         secureTextEntry
       />
 
-      <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
-        <Text style={styles.loginButtonText}>Login</Text>
-      </TouchableOpacity>
+      {/* ✅ Phone Number Field */}
+      <TextInput
+        style={styles.input}
+        placeholder="Phone Number"
+        placeholderTextColor="#888"
+        value={phoneNumber}
+        onChangeText={setPhoneNumber}
+        keyboardType="phone-pad"
+      />
 
-      <TouchableOpacity
-        style={styles.registerButton}
-        onPress={() => navigation.navigate('AthleteRegistration')}
-      >
-        <Text style={styles.registerButtonText}>Don't have an account? Register</Text>
+      <TextInput
+        style={styles.input}
+        placeholder="SDSC Team"
+        placeholderTextColor="#888"
+        value={sdscteam}
+        onChangeText={setSdscteam}
+      />
+
+      <TouchableOpacity style={styles.button} onPress={handleSignUp}>
+        <Text style={styles.buttonText}>Create Guide</Text>
       </TouchableOpacity>
     </ScrollView>
   );
@@ -71,64 +108,39 @@ const AthleteLogin = () => {
 
 const styles = StyleSheet.create({
   container: {
-    flexGrow: 1,
     padding: 20,
     backgroundColor: '#DDE4CB',
+    flexGrow: 1,
+    justifyContent: 'center',
   },
-  headerContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 20,
-    marginTop: 50,
-  },
-  logo: {
-    width: 40,
-    height: 40,
-    resizeMode: 'contain',
-  },
-  headerText: {
-    fontSize: 18,
+  header: {
+    fontSize: 24,
     fontWeight: 'bold',
     color: '#19235E',
-    marginLeft: 10,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: '600',
-    marginBottom: 15,
-    color: '#19235E',
+    marginBottom: 20,
     textAlign: 'center',
   },
   input: {
-    height: 50,
-    borderColor: '#ddd',
     borderWidth: 1,
-    borderRadius: 8,
-    paddingHorizontal: 10,
+    borderColor: '#ccc',
+    borderRadius: 10,
+    padding: 12,
     marginBottom: 15,
-    color: '#000',
     backgroundColor: '#fff',
+    color: '#000',
   },
-  loginButton: {
+  button: {
     backgroundColor: '#19235E',
-    paddingVertical: 15,
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-  loginButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  registerButton: {
+    paddingVertical: 14,
+    borderRadius: 10,
     marginTop: 10,
     alignItems: 'center',
   },
-  registerButtonText: {
-    color: '#19235E',
+  buttonText: {
+    color: '#fff',
+    fontWeight: 'bold',
     fontSize: 16,
-    fontWeight: '600',
   },
 });
 
-export default AthleteLogin;
+export default CreateGuideAccount;

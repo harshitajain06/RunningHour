@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import {
   View,
@@ -48,16 +49,10 @@ const ManageLocations = () => {
           style: 'destructive',
           onPress: async () => {
             try {
-              // Delete Firestore doc
               await deleteDoc(doc(db, 'event_locations', id));
-
-              // Delete image from storage
               const imageRef = ref(storage, imageUrl);
               await deleteObject(imageRef);
-
-              // Update local state
               setLocations(prev => prev.filter(loc => loc.id !== id));
-
               Alert.alert('Deleted', 'Location deleted successfully');
             } catch (error) {
               console.error('Error deleting location:', error);
@@ -87,7 +82,7 @@ const ManageLocations = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Manage Event Locations</Text>
+      <Text style={styles.title}>Runninghour Event Locations</Text>
       <FlatList
         data={locations}
         keyExtractor={item => item.id}
@@ -97,6 +92,7 @@ const ManageLocations = () => {
             <View style={styles.info}>
               <Text style={styles.locationName}>{item.locationName}</Text>
               <Text style={styles.description}>{item.description}</Text>
+              {/* Uncomment below to enable delete */}
               {/* <TouchableOpacity
                 style={styles.deleteButton}
                 onPress={() => handleDelete(item.id, item.imageUrl)}
