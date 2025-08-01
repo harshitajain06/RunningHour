@@ -1,8 +1,7 @@
 // src/components/AthleteDashboard.js
 
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons'; // For icons
 
 const AthleteDashboard = () => {
@@ -13,7 +12,7 @@ const AthleteDashboard = () => {
       {/* Header */}
       <View style={styles.headerContainer}>
         <Image source={require('../../assets/images/logo.png')} style={styles.logo} />
-        <Text style={styles.headerText}>SCDC SMART</Text>
+        <Text style={styles.headerText}>RunningHour</Text>
       </View>
 
       {/* Title */}
